@@ -1,4 +1,9 @@
-package day7_bca_chat_with_serialization;
+package basic_chat_app.client;
+
+import basic_chat_app.shared.Message;
+import basic_chat_app.shared.MessageCtoS_Chat;
+import basic_chat_app.shared.MessageCtoS_Join;
+import basic_chat_app.shared.MessageCtoS_Quit;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

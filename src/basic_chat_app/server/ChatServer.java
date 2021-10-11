@@ -1,4 +1,4 @@
-package day7_bca_chat_with_serialization;
+package basic_chat_app.server;
 
 import java.io.IOException;
 import java.net.Inet4Address;

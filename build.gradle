@@ -1,0 +1,72 @@
+plugins {
+    id 'java'
+}
+
+group 'org.bergen.atcs.capstone.ant'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.14
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.1.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.1.0'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+    test {
+        java {
+            srcDir 'test'
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task server(dependsOn: 'classes', type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'basic_chat_app.server.ChatServer'
+    standardInput = System.in
+}
+
+task serverJar(type: Jar) {
+    from(sourceSets.main.output) {
+        exclude 'client/**'
+    }
+    manifest {
+        attributes 'Main-Class': 'basic_chat_app.server.ChatServer'
+    }
+    appendix 'server'
+}
+
+task client(dependsOn: 'classes', type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'basic_chat_app.client.ChatClient'
+    standardInput = System.in
+}
+
+task clientJar(type: Jar) {
+    from(sourceSets.main.output) {
+        exclude 'server/**'
+    }
+    manifest {
+        attributes 'Main-Class': 'basic_chat_app.client.ChatClient'
+    }
+    appendix 'client'
+}
+
+task ci() {
+    dependsOn 'build'
+    dependsOn 'clientJar'
+    dependsOn 'serverJar'
+}

@@ -1,4 +1,6 @@
-package day7_bca_chat_with_serialization;
+package basic_chat_app.server;
+
+import basic_chat_app.shared.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

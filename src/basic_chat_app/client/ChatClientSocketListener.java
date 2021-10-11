@@ -1,4 +1,9 @@
-package day7_bca_chat_with_serialization;
+package basic_chat_app.client;
+
+import basic_chat_app.shared.Message;
+import basic_chat_app.shared.MessageStoC_Chat;
+import basic_chat_app.shared.MessageStoC_Exit;
+import basic_chat_app.shared.MessageStoC_Welcome;
 
 import java.io.ObjectInputStream;
 

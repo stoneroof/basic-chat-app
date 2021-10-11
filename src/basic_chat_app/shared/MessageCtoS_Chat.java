@@ -1,4 +1,4 @@
-package day7_bca_chat_with_serialization;
+package basic_chat_app.shared;
 
 public class MessageCtoS_Chat extends Message {
     public String msg;
