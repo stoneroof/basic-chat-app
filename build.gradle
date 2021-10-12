@@ -40,6 +40,7 @@ task server(dependsOn: 'classes', type: JavaExec) {
 }
 
 task serverJar(type: Jar) {
+    from(sourceSets.main.output)
     manifest {
         attributes 'Main-Class': 'basic_chat_app.server.ChatServer'
     }
@@ -53,6 +54,7 @@ task client(dependsOn: 'classes', type: JavaExec) {
 }
 
 task clientJar(type: Jar) {
+    from(sourceSets.main.output)
     manifest {
         attributes 'Main-Class': 'basic_chat_app.client.ChatClient'
     }
@@ -64,4 +66,3 @@ task ci() {
     dependsOn 'clientJar'
     dependsOn 'serverJar'
 }
-
