@@ -12,10 +12,10 @@ import java.net.Socket;
 public class ChatServerSocketListener  implements Runnable {
     private Socket socket;
 
-    private ClientConnectionData client;
-    private List<ClientConnectionData> clientList;
+    private User client;
+    private List<User> clientList;
 
-    public ChatServerSocketListener(Socket socket, List<ClientConnectionData> clientList) {
+    public ChatServerSocketListener(Socket socket, List<User> clientList) {
         this.socket = socket;
         this.clientList = clientList;
     }
@@ -25,7 +25,7 @@ public class ChatServerSocketListener  implements Runnable {
         ObjectInputStream socketIn = new ObjectInputStream(socket.getInputStream());
         String name = socket.getInetAddress().getHostName();
 
-        client = new ClientConnectionData(socket, socketIn, socketOut, name);
+        client = new User(socket, socketIn, socketOut, name);
         clientList.add(client);
 
         System.out.println("added client " + name);
@@ -40,10 +40,10 @@ public class ChatServerSocketListener  implements Runnable {
     /**
      * Broadcasts a message to all clients connected to the server.
      */
-    public void broadcast(Message m, ClientConnectionData skipClient) {
+    public void broadcast(Message m, User skipClient) {
         try {
             System.out.println("broadcasting: " + m);
-            for (ClientConnectionData c : clientList){
+            for (User c : clientList){
                 // if c equals skipClient, then c.
                 // or if c hasn't set a userName yet (still joining the server)
                 if ((c != skipClient) && (c.getUserName()!= null)){

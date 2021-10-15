@@ -4,14 +4,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public class ClientConnectionData {
+public class User {
     private Socket socket;
     private ObjectInputStream input;
     private ObjectOutputStream out;
     private String name;
     private String userName;
 
-    public ClientConnectionData(Socket socket, ObjectInputStream input, ObjectOutputStream out, String name) {
+    public User(Socket socket, ObjectInputStream input, ObjectOutputStream out, String name) {
         this.socket = socket;
         this.input = input;
         this.out = out;
@@ -57,6 +57,5 @@ public class ClientConnectionData {
     public void setUserName(String userName) {
         this.userName = userName;
     }
-
     
 }

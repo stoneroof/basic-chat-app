@@ -12,9 +12,9 @@ import java.util.concurrent.Executors;
 
 public class ChatServer {
     public static final int PORT = 54323;
-    private static final ArrayList<ClientConnectionData> clientArrayList = new ArrayList<>();
+    private static final ArrayList<User> clientArrayList = new ArrayList<>();
     //Make this a thread-safe collection 
-    private static final List<ClientConnectionData> clientList = Collections.synchronizedList(clientArrayList);
+    private static final List<User> clientList = Collections.synchronizedList(clientArrayList);
 
     public static void main(String[] args) throws Exception {
         ExecutorService pool = Executors.newFixedThreadPool(100);
