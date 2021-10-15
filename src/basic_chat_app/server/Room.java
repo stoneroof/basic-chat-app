@@ -31,7 +31,7 @@ public abstract class Room implements Serializable {
     public boolean connectUser(User user) throws IOException {
         if (canJoin(user)) {
             synchronized (connectedUsers) {
-                if (!connectedUsers.add(user)) {
+                if (connectedUsers.add(user)) {
                     send(new JoinMessage(user.getName()));
                 }
             }
