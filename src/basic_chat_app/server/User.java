@@ -8,14 +8,14 @@ public class User {
     private Socket socket;
     private ObjectInputStream input;
     private ObjectOutputStream out;
-    private String name;
+    private String hostName;
     private String userName;
 
     public User(Socket socket, ObjectInputStream input, ObjectOutputStream out, String name) {
         this.socket = socket;
         this.input = input;
         this.out = out;
-        this.name = name;
+        this.hostName = name;
     }
 
     public Socket getSocket() {
@@ -42,12 +42,12 @@ public class User {
         this.out = out;
     }
 
-    public String getName() {
-        return name;
+    public String getHostName() {
+        return hostName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
     }
 
     public String getUserName() {

@@ -9,8 +9,12 @@ import basic_chat_app.shared.LeaveMessage;
 import basic_chat_app.shared.Message;
 
 public abstract class Room implements Serializable {
-    private HashSet<User> connectedUsers;
+    private final HashSet<User> connectedUsers = new HashSet<>();
     private String name;
+
+    public Room(String name) {
+        this.name = name;
+    }
 
     public String getName() {
         return name;
@@ -28,24 +32,41 @@ public abstract class Room implements Serializable {
         }
     }
     
-    public boolean connectUser(User user) throws IOException {
+    public void connectUser(User user) throws IOException {
         if (canJoin(user)) {
             synchronized (connectedUsers) {
                 if (connectedUsers.add(user)) {
-                    send(new JoinMessage(user.getName()));
+                    // TODO: Send success message
+                    send(new JoinMessage(user.getHostName()));
+                } else {
+                    // TODO: Send "already in room" message
                 }
             }
-            return true;
         } else {
-            return false;
+            // TODO: Send "access denied" message
         }
     }
 
-    public void disconnectUser(User user) throws IOException {
+    public boolean disconnectUser(User user) throws IOException {
         synchronized (connectedUsers) {
             if (connectedUsers.remove(user)) {
-                send(new LeaveMessage(user.getName()));
+                send(new LeaveMessage(user.getHostName()));
+                return true;
+            } else {
+                return false;
             }
+        }
+    }
+
+    public boolean hasUser(User user) {
+        synchronized (connectedUsers) {
+            return connectedUsers.contains(user);
+        }
+    }
+
+    public int numberOfConnectedUsers() {
+        synchronized (connectedUsers) {
+            return connectedUsers.size();
         }
     }
 

@@ -1,9 +1,14 @@
 package basic_chat_app.server;
 
+import java.io.IOException;
 import java.util.HashSet;
 
 public class PrivateRoom extends Room {
-    private HashSet<User> allowedUsers;
+    private final HashSet<User> allowedUsers = new HashSet<>();
+
+    public PrivateRoom(String name) {
+        super(name);
+    }
 
     @Override
     public boolean canJoin(User user) {
@@ -12,16 +17,20 @@ public class PrivateRoom extends Room {
         }
     }
 
-    public void addUser(User user) {
+    public boolean addUser(User user) throws IOException {
         synchronized (allowedUsers) {
-            allowedUsers.add(user);
+            return allowedUsers.add(user);
         }
     }
 
-    public void removeUser(User user) {
+    public boolean removeUser(User user) throws IOException {
         synchronized (allowedUsers) {
-            allowedUsers.remove(user);
+            if (allowedUsers.remove(user)) {
+                disconnectUser(user);
+                return true;
+            } else {
+                return false;
+            }
         }
-        // TODO: Kick out users if they're currently connected
     }
 }

@@ -81,7 +81,7 @@ public class ChatServerSocketListener  implements Runnable {
         } catch (Exception ex) {
             if (ex instanceof SocketException) {
                 System.out.println("Caught socket ex for " + 
-                    client.getName());
+                    client.getHostName());
             } else {
                 System.out.println(ex);
                 ex.printStackTrace();
