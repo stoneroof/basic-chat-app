@@ -6,4 +6,8 @@ public class JoinMessage extends Message {
     public JoinMessage(String userName) {
         this.userName = userName;
     }
+
+    public String toString() {
+        return userName + " joined";
+    }
 }

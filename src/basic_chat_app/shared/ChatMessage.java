@@ -10,4 +10,8 @@ public class ChatMessage extends Message {
         this.message = message;
         this.room = room;
     }
+
+    public String toString() {
+        return "In room " + room + " chat message from" + userName + ": " + message;
+    }
 }
