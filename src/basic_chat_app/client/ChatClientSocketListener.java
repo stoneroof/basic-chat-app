@@ -1,9 +1,6 @@
 package basic_chat_app.client;
 
 import basic_chat_app.shared.Message;
-import basic_chat_app.shared.MessageStoC_Chat;
-import basic_chat_app.shared.MessageStoC_Exit;
-import basic_chat_app.shared.MessageStoC_Welcome;
 
 import java.io.ObjectInputStream;
 
@@ -14,36 +11,12 @@ public class ChatClientSocketListener implements Runnable {
         this.socketIn = socketIn;
     }
 
-    private void processChatMessage(MessageStoC_Chat m) {
-        System.out.println(m.userName + ": " + m.msg);
-    }
-
-    private void processWelcomeMessage(MessageStoC_Welcome m) {
-        System.out.println(m.userName + " joined the server!");
-    }
-
-    private void processExitMessage(MessageStoC_Exit m) {
-        System.out.println(m.userName + " left the server!");
-    }
-
     @Override
     public void run() {
         try {
             while (true) {
                 Message msg = (Message) socketIn.readObject();
-
-                if (msg instanceof MessageStoC_Welcome) {
-                    processWelcomeMessage((MessageStoC_Welcome) msg);
-                }
-                else if (msg instanceof MessageStoC_Chat) {
-                    processChatMessage((MessageStoC_Chat) msg);
-                }
-                else if (msg instanceof MessageStoC_Exit) {
-                    processExitMessage((MessageStoC_Exit) msg);
-                }
-                else {
-                    System.out.println("Unhandled message type: " + msg.getClass());
-                }
+                System.out.println(msg);
             }
         } catch (Exception ex) {
             System.out.println("Exception caught in listener - " + ex);

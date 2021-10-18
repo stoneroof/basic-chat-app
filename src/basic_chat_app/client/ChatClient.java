@@ -1,9 +1,9 @@
 package basic_chat_app.client;
 
-import basic_chat_app.shared.Message;
-import basic_chat_app.shared.MessageCtoS_Chat;
-import basic_chat_app.shared.MessageCtoS_Join;
-import basic_chat_app.shared.MessageCtoS_Quit;
+import basic_chat_app.shared.Request;
+import basic_chat_app.shared.RegisterRequest;
+import basic_chat_app.shared.MessageRequest;
+import basic_chat_app.shared.RoomLeaveRequest;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -26,7 +26,7 @@ public class ChatClient {
         new Thread(new ChatClientSocketListener(socketIn)).start();
     }
 
-    private void sendMessage(Message m) throws Exception {
+    private void sendRequest(Request m) throws Exception {
         socketOut.writeObject(m);
 //        socketOut.flush();
     }
@@ -35,14 +35,14 @@ public class ChatClient {
         System.out.print("Chat sessions has started - enter a user name: ");
         String name = in.nextLine().trim();
 
-        sendMessage(new MessageCtoS_Join(name));
+        sendRequest(new RegisterRequest(name));
 
         String line = in.nextLine().trim();
         while (!line.toLowerCase().startsWith("/quit")) {
-            sendMessage(new MessageCtoS_Chat(line));
+            sendRequest(new MessageRequest(line));
             line = in.nextLine().trim();
         }
-        sendMessage(new MessageCtoS_Quit());
+        sendRequest(new RoomLeaveRequest());
 
     }
 
