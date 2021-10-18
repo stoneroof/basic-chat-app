@@ -1,10 +1,12 @@
 package basic_chat_app.server;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 public class PrivateRoom extends Room {
-    private final HashSet<User> allowedUsers = new HashSet<>();
+    private final Set<User> allowedUsers = Collections.synchronizedSet(new HashSet<>());
 
     public PrivateRoom(long id, String name) {
         super(id, name);
@@ -12,25 +14,19 @@ public class PrivateRoom extends Room {
 
     @Override
     public boolean canJoin(User user) {
-        synchronized (allowedUsers) {
-            return allowedUsers.contains(user);
-        }
+        return allowedUsers.contains(user);
     }
 
     public boolean addUser(User user) throws IOException {
-        synchronized (allowedUsers) {
-            return allowedUsers.add(user);
-        }
+        return allowedUsers.add(user);
     }
 
     public boolean removeUser(User user) throws IOException {
-        synchronized (allowedUsers) {
-            if (allowedUsers.remove(user)) {
-                disconnectUser(user);
-                return true;
-            } else {
-                return false;
-            }
+        if (allowedUsers.remove(user)) {
+            disconnectUser(user);
+            return true;
+        } else {
+            return false;
         }
     }
 }
