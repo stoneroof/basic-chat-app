@@ -1,9 +1,6 @@
 package basic_chat_app.client;
 
-import basic_chat_app.shared.Request;
-import basic_chat_app.shared.RegisterRequest;
-import basic_chat_app.shared.MessageRequest;
-import basic_chat_app.shared.RoomLeaveRequest;
+import basic_chat_app.shared.*;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -39,10 +36,18 @@ public class ChatClient {
 
         String line = in.nextLine().trim();
         while (!line.toLowerCase().startsWith("/quit")) {
-            sendRequest(new MessageRequest(line));
+            if (line.toLowerCase().startsWith("/join")) {
+                sendRequest(new RoomJoinRequest(line));
+            }
+            else if (line.toLowerCase().startsWith("/leave")){
+                sendRequest(new RoomLeaveRequest());
+            }
+            else {
+                sendRequest(new MessageRequest(line));
+            }
             line = in.nextLine().trim();
         }
-        sendRequest(new RoomLeaveRequest());
+        sendRequest(new QuitRequest());
 
     }
 
