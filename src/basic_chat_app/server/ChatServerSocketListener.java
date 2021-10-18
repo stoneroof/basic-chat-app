@@ -8,16 +8,22 @@ import java.io.ObjectOutputStream;
 import java.net.SocketException;
 import java.util.List;
 import java.net.Socket;
+import java.util.Map;
+import java.util.Optional;
 
-public class ChatServerSocketListener  implements Runnable {
+public class ChatServerSocketListener implements Runnable {
+    private static long lastID = 0L;
+
     private Socket socket;
 
-    private User client;
-    private List<User> clientList;
+    private User user;
+    private final List<User> users;
+    private final Map<Long, Room> rooms;
 
-    public ChatServerSocketListener(Socket socket, List<User> clientList) {
+    public ChatServerSocketListener(Socket socket, List<User> users, Map<Long, Room> rooms) {
         this.socket = socket;
-        this.clientList = clientList;
+        this.users = users;
+        this.rooms = rooms;
     }
 
     private void setup() throws Exception {
@@ -25,76 +31,160 @@ public class ChatServerSocketListener  implements Runnable {
         ObjectInputStream socketIn = new ObjectInputStream(socket.getInputStream());
         String name = socket.getInetAddress().getHostName();
 
-        client = new User(socket, socketIn, socketOut, name);
-        clientList.add(client);
+        user = new User(socket, socketIn, socketOut, name);
+        users.add(user);
 
         System.out.println("added client " + name);
-
     }
 
-    private void processChatMessage(MessageCtoS_Chat m) {
-        System.out.println("Chat received from " + client.getUserName() + " - broadcasting");
-        broadcast(new MessageStoC_Chat(client.getUserName(), m.msg), client);
+    private Room findRoomByName(String name) {
+        synchronized (rooms) {
+            return rooms.values().stream().filter(room -> room.getName().equals(name)).findAny().orElse(null);
+        }
     }
 
-    /**
-     * Broadcasts a message to all clients connected to the server.
-     */
-    public void broadcast(Message m, User skipClient) {
-        try {
-            System.out.println("broadcasting: " + m);
-            for (User c : clientList){
-                // if c equals skipClient, then c.
-                // or if c hasn't set a userName yet (still joining the server)
-                if ((c != skipClient) && (c.getUserName()!= null)){
-                    c.getOut().writeObject(m);
-                }
-            }
-        } catch (Exception ex) {
-            System.out.println("broadcast caught exception: " + ex);
-            ex.printStackTrace();
-        }        
+    private void purgeEmptyRooms() {
+        synchronized (rooms) {
+            rooms.entrySet().removeIf(entry -> {
+                Room room = entry.getValue();
+                return room.numberOfConnectedUsers() == 0;
+            });
+        }
+    }
+
+    private static synchronized long nextRoomID() {
+        return lastID++;
+    }
+
+    private void addRoom(Room room) {
+        rooms.put(room.getID(), room);
     }
 
     @Override
     public void run() {
         try {
             setup();
-            ObjectInputStream in = client.getInput();
+            ObjectInputStream in = user.getInput();
 
-            MessageCtoS_Join joinMessage = (MessageCtoS_Join)in.readObject();
-            client.setUserName(joinMessage.userName);
-            broadcast(new MessageStoC_Welcome(joinMessage.userName), client);
-            
+            RegisterRequest registerRequest = (RegisterRequest)in.readObject();
+            user.setUserName(registerRequest.userName);
+
             while (true) {
-                Message msg = (Message) in.readObject();
-                if (msg instanceof MessageCtoS_Quit) {
+                Request request = (Request) in.readObject();
+                if (request instanceof QuitRequest) {
                     break;
                 }
-                else if (msg instanceof MessageCtoS_Chat) {
-                    processChatMessage((MessageCtoS_Chat) msg);
+                else if (request instanceof RoomJoinRequest) {
+                    synchronized (rooms) {
+                        Room room = findRoomByName(((RoomJoinRequest) request).roomName);
+                        if (room == null) {
+                            room = new PublicRoom(nextRoomID(), ((RoomJoinRequest) request).roomName);
+                            addRoom(room);
+                        }
+                        room.connectUser(user);
+                    }
+                }
+                else if (request instanceof RoomLeaveRequest) {
+                    Room room = rooms.get(((RoomLeaveRequest) request).roomID);
+                    if (room != null) {
+                        room.disconnectUser(user);
+                    } else {
+                        user.getOut().writeObject(new ErrorMessage("Room does not exist"));
+                    }
+                    purgeEmptyRooms();
+                }
+                else if (request instanceof RoomNameRequest) {
+                    Room room = rooms.get(((RoomNameRequest) request).roomID);
+                    String name = ((RoomNameRequest) request).roomName;
+                    if (room != null) {
+                        synchronized (rooms) {
+                            if (findRoomByName(name) == null) {
+                                String oldName = room.getName();
+                                room.setName(name);
+                                room.send(new RoomNameMessage(oldName, name, user.getUserName()));
+                            } else {
+                                user.getOut().writeObject(new ErrorMessage("Name taken"));
+                            }
+                        }
+                    } else {
+                        user.getOut().writeObject(new ErrorMessage("Room does not exist"));
+                    }
+                }
+                else if (request instanceof PrivateRoomRequest) {
+                    String name = ((PrivateRoomRequest) request).roomName;
+                    synchronized (rooms) {
+                        if (findRoomByName(name) == null) {
+                            PrivateRoom room = new PrivateRoom(nextRoomID(), name);
+                            addRoom(room);
+                            room.addUser(user);
+                        } else {
+                            user.getOut().writeObject(new ErrorMessage("Name taken"));
+                        }
+                    }
+                }
+                else if (request instanceof AddUserRequest) {
+                    Room room = rooms.get(((AddUserRequest) request).roomID);
+                    if (room == null) {
+                        user.getOut().writeObject("Room does not exist");
+                    } else if (room.hasUser(user)) {
+                        if (room instanceof PrivateRoom) {
+                            String username = ((AddUserRequest) request).userName;
+                            Optional<User> userToAdd;
+                            synchronized (users) {
+                                userToAdd = users.stream().filter(u -> username.equals(u.getUserName())).findFirst();
+                            }
+                            if (userToAdd.isPresent()) {
+                                ((PrivateRoom) room).addUser(userToAdd.get());
+                                userToAdd.get().getOut().writeObject(new InviteMessage(user.getUserName(), room.getName()));
+                            } else {
+                                user.getOut().writeObject(new ErrorMessage("Could not find user"));
+                            }
+                        } else {
+                            user.getOut().writeObject(new ErrorMessage("Room is not a private room"));
+                        }
+                    } else {
+                        user.getOut().writeObject(new ErrorMessage("Not in the room"));
+                    }
+                }
+                else if (request instanceof MessageRequest) {
+                    Room room = rooms.get(((MessageRequest) request).roomID);
+                    if (room == null) {
+                        user.getOut().writeObject("Room does not exist");
+                    } else if (room.hasUser(user)) {
+                        room.send(new ChatMessage(user.getUserName(), ((MessageRequest) request).message, room.getName()));
+                    } else {
+                        user.getOut().writeObject(new ErrorMessage("Not in the room"));
+                    }
                 }
                 else {
-                    System.out.println("Unhandled message type: " + msg.getClass());
+                    System.out.println("Unhandled message type: " + request.getClass());
                 }
             }
         } catch (Exception ex) {
             if (ex instanceof SocketException) {
                 System.out.println("Caught socket ex for " + 
-                    client.getHostName());
+                    user.getHostName());
             } else {
                 System.out.println(ex);
                 ex.printStackTrace();
             }
         } finally {
-            //Remove client from clientList
-            clientList.remove(client); 
+            users.remove(user);
 
-            // Notify everyone that the user left.
-            broadcast(new MessageStoC_Exit(client.getUserName()), client);
+            synchronized (rooms) {
+                for (Room room: rooms.values()) {
+                    if (room.hasUser(user)) {
+                        try {
+                            room.disconnectUser(user);
+                        } catch (IOException ex) {}
+                    }
+                }
+            }
+
+            purgeEmptyRooms();
 
             try {
-                client.getSocket().close();
+                user.getSocket().close();
             } catch (IOException ex) {}
         }
     }
