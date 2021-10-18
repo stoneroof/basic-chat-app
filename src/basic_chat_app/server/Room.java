@@ -4,16 +4,20 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashSet;
 
-import basic_chat_app.shared.JoinMessage;
-import basic_chat_app.shared.LeaveMessage;
-import basic_chat_app.shared.Message;
+import basic_chat_app.shared.*;
 
 public abstract class Room implements Serializable {
     private final HashSet<User> connectedUsers = new HashSet<>();
+    private final long id;
     private String name;
 
-    public Room(String name) {
+    public Room(long id, String name) {
+        this.id = id;
         this.name = name;
+    }
+
+    public long getID() {
+        return id;
     }
 
     public String getName() {
@@ -36,14 +40,14 @@ public abstract class Room implements Serializable {
         if (canJoin(user)) {
             synchronized (connectedUsers) {
                 if (connectedUsers.add(user)) {
-                    // TODO: Send success message
+                    user.getOut().writeObject(new RoomJoinResponse(getID()));
                     send(new JoinMessage(user.getHostName()));
                 } else {
-                    // TODO: Send "already in room" message
+                    user.getOut().writeObject(new ErrorMessage("Already in room"));
                 }
             }
         } else {
-            // TODO: Send "access denied" message
+            user.getOut().writeObject(new ErrorMessage("Access denied"));
         }
     }
 

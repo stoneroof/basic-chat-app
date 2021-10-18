@@ -6,8 +6,8 @@ import java.util.HashSet;
 public class PrivateRoom extends Room {
     private final HashSet<User> allowedUsers = new HashSet<>();
 
-    public PrivateRoom(String name) {
-        super(name);
+    public PrivateRoom(long id, String name) {
+        super(id, name);
     }
 
     @Override
