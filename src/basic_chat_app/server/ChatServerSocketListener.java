@@ -53,6 +53,9 @@ public class ChatServerSocketListener implements Runnable {
     }
 
     private static synchronized long nextRoomID() {
+        if (lastID == Long.MAX_VALUE) {
+            return -1; // we're out of IDs
+        }
         return lastID++;
     }
 
@@ -82,8 +85,13 @@ public class ChatServerSocketListener implements Runnable {
                     synchronized (rooms) {
                         Room room = findRoomByName(((RoomJoinRequest) request).roomName);
                         if (room == null) {
-                            room = new PublicRoom(nextRoomID(), ((RoomJoinRequest) request).roomName);
-                            addRoom(room);
+                            long id = nextRoomID();
+                            if (id < 0) {
+                                user.getOut().writeObject(new ErrorMessage("Room limit reached"));
+                            } else {
+                                room = new PublicRoom(nextRoomID(), ((RoomJoinRequest) request).roomName);
+                                addRoom(room);
+                            }
                         }
                         room.connectUser(user);
                     }
@@ -118,9 +126,14 @@ public class ChatServerSocketListener implements Runnable {
                     String name = ((PrivateRoomRequest) request).roomName;
                     synchronized (rooms) {
                         if (findRoomByName(name) == null) {
-                            PrivateRoom room = new PrivateRoom(nextRoomID(), name);
-                            addRoom(room);
-                            room.addUser(user);
+                            long id = nextRoomID();
+                            if (id < 0) {
+                                user.getOut().writeObject(new ErrorMessage("Room limit reached"));
+                            } else {
+                                PrivateRoom room = new PrivateRoom(id, name);
+                                addRoom(room);
+                                room.addUser(user);
+                            }
                         } else {
                             user.getOut().writeObject(new ErrorMessage("Name taken"));
                         }
