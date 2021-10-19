@@ -11,6 +11,7 @@ public class ChatClient {
     private Socket socket;
     private ObjectOutputStream socketOut;
     private ObjectInputStream socketIn;
+    private RoomId roomId;
 
     public ChatClient(String ip, int port) throws Exception {
         socket = new Socket(ip, port);
@@ -20,7 +21,7 @@ public class ChatClient {
 
     // start a thread to listen for messages from the server
     private void startListener() {
-        new Thread(new ChatClientSocketListener(socketIn)).start();
+        new Thread(new ChatClientSocketListener(socketIn, roomId)).start();
     }
 
     private void sendRequest(Request m) throws Exception {
@@ -35,15 +36,22 @@ public class ChatClient {
         sendRequest(new RegisterRequest(name));
 
         String line = in.nextLine().trim();
-        while (!line.toLowerCase().startsWith("/quit")) {
+        while (true) {
             if (line.toLowerCase().startsWith("/join")) {
                 sendRequest(new RoomJoinRequest(line));
             }
+            else if (line.toLowerCase().startsWith("/quit")) {
+                break;
+            }
+            else if (roomId == null) {
+                System.out.println("Please join a room");
+            }
             else if (line.toLowerCase().startsWith("/leave")){
-                sendRequest(new RoomLeaveRequest());
+                sendRequest(new RoomLeaveRequest(roomId));
+                roomId = null;
             }
             else {
-                sendRequest(new MessageRequest(line));
+                sendRequest(new MessageRequest(roomId, line));
             }
             line = in.nextLine().trim();
         }

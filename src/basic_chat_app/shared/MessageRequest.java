@@ -1,11 +1,13 @@
 package basic_chat_app.shared;
 
+import basic_chat_app.client.RoomId;
+
 public class MessageRequest extends Request {
     public long roomID;
     public String message;
 
-    public MessageRequest(long roomID, String message) {
-        this.roomID = roomID;
+    public MessageRequest(RoomId roomID, String message) {
+        this.roomID = roomID.roomId;
         this.message = message;
     }
 
