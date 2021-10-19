@@ -22,6 +22,7 @@ public class ChatClientSocketListener implements Runnable {
                 if (msg instanceof RoomJoinResponse) {
                     synchronized(roomId) {
                         roomId.roomId = ((RoomJoinResponse) msg).roomID;
+                        roomId.connected = true;
                     }
                 } else {
                     System.out.println(msg);

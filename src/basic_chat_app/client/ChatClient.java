@@ -30,6 +30,8 @@ public class ChatClient {
     }
 
     private void mainLoop(Scanner in) throws Exception {
+        roomId = new RoomId();
+
         System.out.print("Chat sessions has started - enter a user name: ");
         String name = in.nextLine().trim();
 
@@ -43,12 +45,12 @@ public class ChatClient {
             else if (line.toLowerCase().startsWith("/quit")) {
                 break;
             }
-            else if (roomId == null) {
+            else if (!roomId.connected) {
                 System.out.println("Please join a room");
             }
             else if (line.toLowerCase().startsWith("/leave")){
                 sendRequest(new RoomLeaveRequest(roomId));
-                roomId = null;
+                roomId.connected = false;
             }
             else {
                 sendRequest(new MessageRequest(roomId, line));
