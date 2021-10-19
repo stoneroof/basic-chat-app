@@ -31,8 +31,14 @@ public abstract class Room implements Serializable {
     }
     
     public void send(Message message) throws IOException {
+        send(message, null);
+    }
+
+    public void send(Message message, User exclude) throws IOException {
         for (User user : connectedUsers) {
-            user.getOut().writeObject(message);
+            if (user != exclude) {
+                user.getOut().writeObject(message);
+            }
         }
     }
     

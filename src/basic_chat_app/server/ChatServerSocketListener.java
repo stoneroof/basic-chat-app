@@ -52,7 +52,7 @@ public class ChatServerSocketListener implements Runnable {
                 return room.numberOfConnectedUsers() == 0;
             });
             size -= rooms.size();
-            System.out.printf("Purged %d room(s)\n", size);
+            if (size > 0) System.out.printf("Purged %d room(s)\n", size);
         }
     }
 
@@ -172,7 +172,7 @@ public class ChatServerSocketListener implements Runnable {
                     if (room == null) {
                         user.getOut().writeObject("Room does not exist");
                     } else if (room.hasUser(user)) {
-                        room.send(new ChatMessage(user.getUserName(), ((MessageRequest) request).message, room.getName()));
+                        room.send(new ChatMessage(user.getUserName(), ((MessageRequest) request).message, room.getName()), user);
                     } else {
                         user.getOut().writeObject(new ErrorMessage("Not in the room"));
                     }
