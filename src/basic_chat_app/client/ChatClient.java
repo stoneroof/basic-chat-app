@@ -21,6 +21,7 @@ public class ChatClient {
 
     // start a thread to listen for messages from the server
     private void startListener() {
+        roomId = new RoomId();
         new Thread(new ChatClientSocketListener(socketIn, roomId)).start();
     }
 
@@ -30,8 +31,6 @@ public class ChatClient {
     }
 
     private void mainLoop(Scanner in) throws Exception {
-        roomId = new RoomId();
-
         System.out.print("Chat sessions has started - enter a user name: ");
         String name = in.nextLine().trim();
 
