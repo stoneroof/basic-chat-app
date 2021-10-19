@@ -9,4 +9,8 @@ public class AddUserRequest extends Request {
         this.roomID = roomID;
         this.userName = userName;
     }
+
+    public boolean isValid() {
+        return this.userName != null;
+    }
 }

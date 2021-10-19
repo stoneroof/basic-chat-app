@@ -8,4 +8,8 @@ public class RoomNameRequest extends Request {
         this.roomID = roomID;
         this.roomName = roomName;
     }
+
+    public boolean isValid() {
+        return this.roomName != null;
+    }
 }

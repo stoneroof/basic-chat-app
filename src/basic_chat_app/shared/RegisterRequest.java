@@ -6,4 +6,8 @@ public class RegisterRequest extends Request {
     public RegisterRequest(String userName) {
         this.userName = userName;
     }
+
+    public boolean isValid() {
+        return this.userName != null;
+    }
 }

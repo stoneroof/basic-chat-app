@@ -6,4 +6,8 @@ public class PrivateRoomRequest extends Request {
     public PrivateRoomRequest(String roomName) {
         this.roomName = roomName;
     }
+
+    public boolean isValid() {
+        return this.roomName != null;
+    }
 }

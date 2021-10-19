@@ -6,4 +6,8 @@ public class RoomLeaveRequest extends Request {
     public RoomLeaveRequest(long roomID) {
         this.roomID = roomID;
     }
+
+    public boolean isValid() {
+        return true;
+    }
 }

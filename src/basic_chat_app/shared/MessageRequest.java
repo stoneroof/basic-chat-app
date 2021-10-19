@@ -8,4 +8,8 @@ public class MessageRequest extends Request {
         this.roomID = roomID;
         this.message = message;
     }
+
+    public boolean isValid() {
+        return this.message != null;
+    }
 }

@@ -71,6 +71,10 @@ public class ChatServerSocketListener implements Runnable {
 
             while (true) {
                 Request request = (Request) in.readObject();
+                if (!request.isValid()) {
+                    user.getOut().writeObject(new ErrorMessage("Malformed request"));
+                    continue;
+                }
                 if (request instanceof QuitRequest) {
                     break;
                 }
@@ -157,7 +161,7 @@ public class ChatServerSocketListener implements Runnable {
                     }
                 }
                 else {
-                    System.out.println("Unhandled message type: " + request.getClass());
+                    user.getOut().writeObject(new ErrorMessage("Unhandled message type: " + request.getClass()));
                 }
             }
         } catch (Exception ex) {

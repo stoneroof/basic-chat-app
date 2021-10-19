@@ -6,4 +6,8 @@ public class RoomJoinRequest extends Request {
     public RoomJoinRequest(String roomName) {
         this.roomName = roomName;
     }
+
+    public boolean isValid() {
+        return this.roomName != null;
+    }
 }
