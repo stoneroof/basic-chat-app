@@ -44,11 +44,15 @@ public class ChatServerSocketListener implements Runnable {
     }
 
     private void purgeEmptyRooms() {
+        int size;
         synchronized (rooms) {
+            size = rooms.size();
             rooms.entrySet().removeIf(entry -> {
                 Room room = entry.getValue();
                 return room.numberOfConnectedUsers() == 0;
             });
+            size -= rooms.size();
+            System.out.printf("Purged %d room(s)\n", size);
         }
     }
 

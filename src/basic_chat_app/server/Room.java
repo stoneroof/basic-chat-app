@@ -40,7 +40,7 @@ public abstract class Room implements Serializable {
         if (canJoin(user)) {
             if (connectedUsers.add(user)) {
                 user.getOut().writeObject(new RoomJoinResponse(getID()));
-                send(new JoinMessage(user.getHostName(), getName()));
+                send(new JoinMessage(user.getUserName(), getName()));
             } else {
                 user.getOut().writeObject(new ErrorMessage("Already in room"));
             }
@@ -51,7 +51,7 @@ public abstract class Room implements Serializable {
 
     public boolean disconnectUser(User user) throws IOException {
         if (connectedUsers.remove(user)) {
-            send(new LeaveMessage(user.getHostName(), getName()));
+            send(new LeaveMessage(user.getUserName(), getName()));
             return true;
         } else {
             return false;
