@@ -49,21 +49,25 @@ public class ChatClient {
             else if (lower.startsWith("/quit")) {
                 break;
             }
-            else if (!roomId.connected) {
-                System.out.println("Please join a room");
-            }
-            else if (lower.startsWith("/leave")) {
-                sendRequest(new RoomLeaveRequest(roomId));
-                roomId.connected = false;
-            }
-            else if (lower.startsWith("/add")) {
-                sendRequest(new AddUserRequest(roomId, line.substring(4).strip()));
-            }
-            else if (lower.startsWith("/rename")) {
-                sendRequest(new RoomNameRequest(roomId, line.substring(7).strip()));
-            }
             else {
-                sendRequest(new MessageRequest(roomId, line));
+                synchronized (roomId) {
+                    if (!roomId.connected) {
+                        System.out.println("Please join a room");
+                    }
+                    else if (lower.startsWith("/leave")) {
+                        sendRequest(new RoomLeaveRequest(roomId));
+                        roomId.connected = false;
+                    }
+                    else if (lower.startsWith("/add")) {
+                        sendRequest(new AddUserRequest(roomId, line.substring(4).strip()));
+                    }
+                    else if (lower.startsWith("/rename")) {
+                        sendRequest(new RoomNameRequest(roomId, line.substring(7).strip()));
+                    }
+                    else {
+                        sendRequest(new MessageRequest(roomId, line));
+                    }
+                }
             }
 
             line = in.nextLine().trim();
