@@ -41,7 +41,10 @@ public class ChatClient {
             String lower = line.toLowerCase();
 
             if (lower.startsWith("/join")) {
-                sendRequest(new RoomJoinRequest(line));
+                sendRequest(new RoomJoinRequest(line.substring(5).strip()));
+            }
+            else if (lower.startsWith("/private")) {
+                sendRequest(new PrivateRoomRequest(line.substring(8).strip()));
             }
             else if (lower.startsWith("/quit")) {
                 break;
@@ -52,6 +55,12 @@ public class ChatClient {
             else if (lower.startsWith("/leave")) {
                 sendRequest(new RoomLeaveRequest(roomId));
                 roomId.connected = false;
+            }
+            else if (lower.startsWith("/add")) {
+                sendRequest(new AddUserRequest(roomId, line.substring(4).strip()));
+            }
+            else if (lower.startsWith("/rename")) {
+                sendRequest(new RoomNameRequest(roomId, line.substring(7).strip()));
             }
             else {
                 sendRequest(new MessageRequest(roomId, line));
