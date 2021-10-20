@@ -11,7 +11,7 @@ public class ChatClient {
     private Socket socket;
     private ObjectOutputStream socketOut;
     private ObjectInputStream socketIn;
-    private RoomId roomId;
+    private ClientSharedData shared;
 
     public ChatClient(String ip, int port) throws Exception {
         socket = new Socket(ip, port);
@@ -21,8 +21,8 @@ public class ChatClient {
 
     // start a thread to listen for messages from the server
     private void startListener() {
-        roomId = new RoomId();
-        new Thread(new ChatClientSocketListener(socketIn, roomId)).start();
+        shared = new ClientSharedData();
+        new Thread(new ChatClientSocketListener(socketIn, shared)).start();
     }
 
     private void sendRequest(Request m) throws Exception {
@@ -46,26 +46,36 @@ public class ChatClient {
             else if (lower.startsWith("/private")) {
                 sendRequest(new PrivateRoomRequest(line.substring(8).strip()));
             }
+            else if (lower.startsWith("/accept")) {
+                synchronized (shared) {
+                    if (shared.invite == null) {
+                        System.out.println("ERROR: No invites available");
+                    } else {
+                        sendRequest(new RoomJoinRequest(shared.invite));
+                        shared.invite = null;
+                    }
+                }
+            }
             else if (lower.startsWith("/quit")) {
                 break;
             }
             else {
-                synchronized (roomId) {
-                    if (!roomId.connected) {
+                synchronized (shared) {
+                    if (!shared.connected) {
                         System.out.println("Please join a room");
                     }
                     else if (lower.startsWith("/leave")) {
-                        sendRequest(new RoomLeaveRequest(roomId));
-                        roomId.connected = false;
+                        sendRequest(new RoomLeaveRequest(shared));
+                        shared.connected = false;
                     }
                     else if (lower.startsWith("/add")) {
-                        sendRequest(new AddUserRequest(roomId, line.substring(4).strip()));
+                        sendRequest(new AddUserRequest(shared, line.substring(4).strip()));
                     }
                     else if (lower.startsWith("/rename")) {
-                        sendRequest(new RoomNameRequest(roomId, line.substring(7).strip()));
+                        sendRequest(new RoomNameRequest(shared, line.substring(7).strip()));
                     }
                     else {
-                        sendRequest(new MessageRequest(roomId, line));
+                        sendRequest(new MessageRequest(shared, line));
                     }
                 }
             }

@@ -1,12 +1,12 @@
 package basic_chat_app.shared;
 
-import basic_chat_app.client.RoomId;
+import basic_chat_app.client.ClientSharedData;
 
 public class RoomLeaveRequest extends Request {
     public long roomID;
 
-    public RoomLeaveRequest(RoomId roomID) {
-        this.roomID = roomID.roomId;
+    public RoomLeaveRequest(ClientSharedData clientData) {
+        this.roomID = clientData.roomId;
     }
 
     public boolean isValid() {

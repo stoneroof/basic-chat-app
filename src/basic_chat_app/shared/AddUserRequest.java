@@ -1,14 +1,14 @@
 package basic_chat_app.shared;
 
-import basic_chat_app.client.RoomId;
+import basic_chat_app.client.ClientSharedData;
 
 public class AddUserRequest extends Request {
     public long roomID;
 
     public String userName;
 
-    public AddUserRequest(RoomId roomID, String userName) {
-        this.roomID = roomID.roomId;
+    public AddUserRequest(ClientSharedData clientData, String userName) {
+        this.roomID = clientData.roomId;
         this.userName = userName;
     }
 
