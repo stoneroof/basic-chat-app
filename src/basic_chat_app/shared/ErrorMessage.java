@@ -1,6 +1,6 @@
 package basic_chat_app.shared;
 
-public class ErrorMessage {
+public class ErrorMessage extends Message {
     public String error;
 
     public ErrorMessage(String error) {
