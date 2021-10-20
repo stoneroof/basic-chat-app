@@ -169,11 +169,11 @@ public class ChatServerSocketListener implements Runnable {
                     }
                 }
                 else if (request instanceof MessageRequest) {
-                    Room room = rooms.get(((MessageRequest) request).roomID);
+                    MessageRequest r = (MessageRequest) request;
+                    Room room = rooms.get(r.roomID);
                     if (room == null) {
                         user.getOut().writeObject("Room does not exist");
                     } else if (room.hasUser(user)) {
-                        MessageRequest r = (MessageRequest) request;
                         room.send(new ChatMessage(user.getUserName(), r.message, room.getName(), r.me), user);
                     } else {
                         user.getOut().writeObject(new ErrorMessage("Not in the room"));
