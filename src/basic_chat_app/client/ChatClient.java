@@ -35,12 +35,38 @@ public class ChatClient {
         String name = in.nextLine().trim();
 
         sendRequest(new RegisterRequest(name));
+        System.out.println("Type /help for help");
 
         String line = in.nextLine().trim();
         while (true) {
             String lower = line.toLowerCase();
 
-            if (lower.startsWith("/join")) {
+            if (lower.startsWith("/help")) {
+                String BOLD = "\033[1m";
+                String INVERSE = "\033[30;47m";
+                String RESET = "\033[0m";
+                System.out.println(String.join(RESET + "\n",
+                    INVERSE + "JAVA SOCKETS LAB",
+                    "by Anthony, Edward, Sasha",
+                    "",
+                    INVERSE + "[General]",
+                    BOLD + "<msg>"          , "\tsends a message",
+                    BOLD + "/me <msg>"      , "\tsends an IRC-style action",
+                    BOLD + "/help"          , "\tshows this help message",
+                    BOLD + "/quit"          , "\tquits",
+                    "",
+                    INVERSE + "[Rooms]",
+                    BOLD + "/join <room>"   , "\tjoins a room by its name", "\tcreates a public room if the room doesn't exist",
+                    BOLD + "/rename <room>" , "\trenames the current room",
+                    BOLD + "/leave"         , "\tleaves the current room",
+                    "",
+                    INVERSE + "[Private Rooms]",
+                    BOLD + "/private <room>", "\tcreates a private room",
+                    BOLD + "/add <user>"    , "\tinvites a user to the current room",
+                    BOLD + "/accept"        , "\taccepts most recent invite", "\tyou can also use /join <room>"
+                ));
+            }
+            else if (lower.startsWith("/join")) {
                 sendRequest(new RoomJoinRequest(line.substring(5).strip()));
             }
             else if (lower.startsWith("/private")) {
