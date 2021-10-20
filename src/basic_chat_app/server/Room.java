@@ -44,11 +44,9 @@ public abstract class Room implements Serializable {
     
     public void connectUser(User user) throws IOException {
         if (canJoin(user)) {
+            user.getOut().writeObject(new RoomJoinResponse(getID()));
             if (connectedUsers.add(user)) {
-                user.getOut().writeObject(new RoomJoinResponse(getID()));
                 send(new JoinMessage(user.getUserName(), getName()));
-            } else {
-                user.getOut().writeObject(new ErrorMessage("Already in room"));
             }
         } else {
             user.getOut().writeObject(new ErrorMessage("Access denied"));
