@@ -74,8 +74,11 @@ public class ChatClient {
                     else if (lower.startsWith("/rename")) {
                         sendRequest(new RoomNameRequest(shared, line.substring(7).strip()));
                     }
+                    else if (lower.startsWith("/me")) {
+                        sendRequest(new MessageRequest(shared, line.substring(3).strip(), true));
+                    }
                     else {
-                        sendRequest(new MessageRequest(shared, line));
+                        sendRequest(new MessageRequest(shared, line, false));
                     }
                 }
             }
