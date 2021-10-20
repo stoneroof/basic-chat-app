@@ -137,6 +137,7 @@ public class ChatServerSocketListener implements Runnable {
                                 PrivateRoom room = new PrivateRoom(id, name);
                                 addRoom(room);
                                 room.addUser(user);
+                                room.connectUser(user);
                             }
                         } else {
                             user.getOut().writeObject(new ErrorMessage("Name taken"));
