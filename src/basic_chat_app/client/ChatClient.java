@@ -38,22 +38,25 @@ public class ChatClient {
 
         String line = in.nextLine().trim();
         while (true) {
-            if (line.toLowerCase().startsWith("/join")) {
+            String lower = line.toLowerCase();
+
+            if (lower.startsWith("/join")) {
                 sendRequest(new RoomJoinRequest(line));
             }
-            else if (line.toLowerCase().startsWith("/quit")) {
+            else if (lower.startsWith("/quit")) {
                 break;
             }
             else if (!roomId.connected) {
                 System.out.println("Please join a room");
             }
-            else if (line.toLowerCase().startsWith("/leave")){
+            else if (lower.startsWith("/leave")) {
                 sendRequest(new RoomLeaveRequest(roomId));
                 roomId.connected = false;
             }
             else {
                 sendRequest(new MessageRequest(roomId, line));
             }
+
             line = in.nextLine().trim();
         }
         sendRequest(new QuitRequest());
