@@ -10,6 +10,6 @@ public class JoinMessage extends Message {
     }
 
     public String toString() {
-        return userName + " joined " + roomName;
+        return String.format("[%s] %s joined", roomName, userName);
     }
 }

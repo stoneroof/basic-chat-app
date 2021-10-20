@@ -8,6 +8,6 @@ public class ErrorMessage extends Message {
     }
 
     public String toString() {
-        return error;
+        return String.format("ERROR: %s", error);
     }
 }

@@ -10,6 +10,6 @@ public class LeaveMessage extends Message {
     }
 
     public String toString() {
-        return userName + " left " + roomName;
+        return String.format("[%s] %s left", roomName, userName);
     }
 }

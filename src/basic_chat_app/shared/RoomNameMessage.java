@@ -12,6 +12,6 @@ public class RoomNameMessage extends Message {
     }
 
     public String toString() {
-        return userName + " changed the room name from " + oldName + " to " + newName;
+        return String.format("[%s] %s changed the room name to [%s]", oldName, userName, newName);
     }
 }

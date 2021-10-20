@@ -12,6 +12,6 @@ public class ChatMessage extends Message {
     }
 
     public String toString() {
-        return "In room " + room + " chat message from " + userName + ": " + message;
+        return String.format("[%s] %s: %s", room, userName, message);
     }
 }

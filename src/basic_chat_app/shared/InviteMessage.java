@@ -10,6 +10,6 @@ public class InviteMessage extends Message {
     }
 
     public String toString() {
-        return userName + " invited you to " + roomName;
+        return String.format("[%s] %s invited you!", roomName, userName);
     }
 }
