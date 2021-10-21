@@ -33,8 +33,6 @@ public class ChatServerSocketListener implements Runnable {
 
         user = new User(socket, socketIn, socketOut, name);
         users.add(user);
-
-        System.out.println("Client connected from " + name);
     }
 
     private Room findRoomByName(String name) {
@@ -167,9 +165,12 @@ public class ChatServerSocketListener implements Runnable {
                                 userToAdd = users.stream().filter(u -> username.equals(u.getUserName())).findFirst();
                             }
                             if (userToAdd.isPresent()) {
-                                ((PrivateRoom) room).addUser(userToAdd.get());
-                                userToAdd.get().getOut().writeObject(new InviteMessage(user.getUserName(), room.getName()));
-                                System.out.printf("User %s added %s to private room %s\n", user, userToAdd.get(), room);
+                                if (((PrivateRoom) room).addUser(userToAdd.get())) {
+                                    userToAdd.get().getOut().writeObject(new InviteMessage(user.getUserName(), room.getName()));
+                                    System.out.printf("User %s added %s to private room %s\n", user, userToAdd.get(), room);
+                                } else {
+                                    user.getOut().writeObject(new ErrorMessage(String.format("%s is already added", userToAdd.get().getUserName())));
+                                }
                             } else {
                                 user.getOut().writeObject(new ErrorMessage("Could not find user"));
                             }
