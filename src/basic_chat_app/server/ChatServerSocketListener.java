@@ -104,7 +104,13 @@ public class ChatServerSocketListener implements Runnable {
                     }
                 }
                 else if (request instanceof RoomLeaveRequest) {
-                    Room room = rooms.get(((RoomLeaveRequest) request).roomID);
+                    RoomLeaveRequest r = (RoomLeaveRequest) request;
+                    Room room;
+                    if (r.roomID >= 0) {
+                        room = rooms.get(r.roomID);
+                    } else {
+                        room = findRoomByName(r.roomName);
+                    }
                     if (room != null) {
                         room.disconnectUser(user);
                     } else {

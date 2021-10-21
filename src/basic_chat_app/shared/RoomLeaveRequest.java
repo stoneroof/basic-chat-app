@@ -15,6 +15,6 @@ public class RoomLeaveRequest extends Request {
     }
 
     public boolean isValid() {
-        return true;
+        return this.roomID >= 0 ^ this.roomName != null; // Edward's XOR
     }
 }
