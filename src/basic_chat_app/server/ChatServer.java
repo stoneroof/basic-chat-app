@@ -18,8 +18,18 @@ public class ChatServer {
         ExecutorService pool = Executors.newFixedThreadPool(100);
 
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("Chat Server started.");
-            System.out.println("Local IP: " + Inet4Address.getLocalHost().getHostAddress());
+            System.out.println("╔═════════════════════════════════════════╗");
+            System.out.println("║  WELCOME TO THE BASIC CHAT APP SERVER!  ║");
+            System.out.println("║   Thank you for your purchase of this   ║");
+            System.out.println("║   Java-based chat server software. We   ║");
+            System.out.println("║    hope you enjoy using our product!    ║");
+            System.out.println("║     (no technical support provided)     ║");
+            System.out.println("║                                         ║");
+            System.out.println("║            Alexandra Volkova            ║");
+            System.out.println("║               Anthony Li                ║");
+            System.out.println("║              Edward Feng                ║");
+            System.out.println("╚═════════════════════════════════════════╝");
+            System.out.println("Local IP:   " + Inet4Address.getLocalHost().getHostAddress());
             System.out.println("Local Port: " + serverSocket.getLocalPort());
 
             while (true) {
