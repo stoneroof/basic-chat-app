@@ -47,6 +47,7 @@ public abstract class Room implements Serializable {
             user.getOut().writeObject(new RoomJoinResponse(getID()));
             if (connectedUsers.add(user)) {
                 send(new JoinMessage(user.getUserName(), getName()));
+                System.out.printf("User %s joined %s\n", user, this);
             }
         } else {
             user.getOut().writeObject(new ErrorMessage("Access denied"));
@@ -56,6 +57,7 @@ public abstract class Room implements Serializable {
     public boolean disconnectUser(User user) throws IOException {
         if (connectedUsers.remove(user)) {
             send(new LeaveMessage(user.getUserName(), getName()));
+            System.out.printf("User %s left %s\n", user, this);
             return true;
         } else {
             return false;
@@ -71,4 +73,8 @@ public abstract class Room implements Serializable {
     }
 
     public abstract boolean canJoin(User user);
+
+    public String toString() {
+        return String.format("\"%s\" (ID: %d)", getName(), getID());
+    }
 }

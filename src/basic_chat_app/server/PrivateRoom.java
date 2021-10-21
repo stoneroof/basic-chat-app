@@ -29,4 +29,8 @@ public class PrivateRoom extends Room {
             return false;
         }
     }
+
+    public String toString() {
+        return String.format("\"%s\" (ID: %d) <private>", getName(), getID());
+    }
 }

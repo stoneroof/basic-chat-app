@@ -34,7 +34,7 @@ public class ChatServerSocketListener implements Runnable {
         user = new User(socket, socketIn, socketOut, name);
         users.add(user);
 
-        System.out.println("added client " + name);
+        System.out.println("Client connected from " + name);
     }
 
     private Room findRoomByName(String name) {
@@ -44,15 +44,16 @@ public class ChatServerSocketListener implements Runnable {
     }
 
     private void purgeEmptyRooms() {
-        int size;
         synchronized (rooms) {
-            size = rooms.size();
             rooms.entrySet().removeIf(entry -> {
                 Room room = entry.getValue();
-                return room.numberOfConnectedUsers() == 0;
+                if (room.numberOfConnectedUsers() == 0) {
+                    System.out.printf("Removing room %s (id: %d)\n", room.getName(), room.getID());
+                    return true;
+                } else {
+                    return false;
+                }
             });
-            size -= rooms.size();
-            if (size > 0) System.out.printf("Purged %d room(s)\n", size);
         }
     }
 
@@ -75,6 +76,7 @@ public class ChatServerSocketListener implements Runnable {
 
             RegisterRequest registerRequest = (RegisterRequest)in.readObject();
             user.setUserName(registerRequest.userName);
+            System.out.printf("User %s registered\n", user);
 
             while (true) {
                 Request request = (Request) in.readObject();
@@ -93,11 +95,14 @@ public class ChatServerSocketListener implements Runnable {
                             if (id < 0) {
                                 user.getOut().writeObject(new ErrorMessage("Room limit reached"));
                             } else {
-                                room = new PublicRoom(nextRoomID(), ((RoomJoinRequest) request).roomName);
+                                room = new PublicRoom(id, ((RoomJoinRequest) request).roomName);
                                 addRoom(room);
+                                System.out.printf("User %s created public room %s\n", user, room);
+                                room.connectUser(user);
                             }
+                        } else {
+                            room.connectUser(user);
                         }
-                        room.connectUser(user);
                     }
                 }
                 else if (request instanceof RoomLeaveRequest) {
@@ -113,14 +118,19 @@ public class ChatServerSocketListener implements Runnable {
                     Room room = rooms.get(((RoomNameRequest) request).roomID);
                     String name = ((RoomNameRequest) request).roomName;
                     if (room != null) {
-                        synchronized (rooms) {
-                            if (findRoomByName(name) == null) {
-                                String oldName = room.getName();
-                                room.setName(name);
-                                room.send(new RoomNameMessage(oldName, name, user.getUserName()));
-                            } else {
-                                user.getOut().writeObject(new ErrorMessage("Name taken"));
+                        if (room.hasUser(user)) {
+                            synchronized (rooms) {
+                                if (findRoomByName(name) == null) {
+                                    String oldName = room.getName();
+                                    room.setName(name);
+                                    room.send(new RoomNameMessage(oldName, name, user.getUserName()));
+                                    System.out.printf("User %s renamed room %d from \"%s\" to \"%s\"\n", user, room.getID(), oldName, name);
+                                } else {
+                                    user.getOut().writeObject(new ErrorMessage("Name taken"));
+                                }
                             }
+                        } else {
+                            user.getOut().writeObject(new ErrorMessage("Not in the room"));
                         }
                     } else {
                         user.getOut().writeObject(new ErrorMessage("Room does not exist"));
@@ -136,6 +146,7 @@ public class ChatServerSocketListener implements Runnable {
                             } else {
                                 PrivateRoom room = new PrivateRoom(id, name);
                                 addRoom(room);
+                                System.out.printf("User %s created private room %s\n", user, room);
                                 room.addUser(user);
                                 room.connectUser(user);
                             }
@@ -158,6 +169,7 @@ public class ChatServerSocketListener implements Runnable {
                             if (userToAdd.isPresent()) {
                                 ((PrivateRoom) room).addUser(userToAdd.get());
                                 userToAdd.get().getOut().writeObject(new InviteMessage(user.getUserName(), room.getName()));
+                                System.out.printf("User %s added %s to private room %s\n", user, userToAdd.get(), room);
                             } else {
                                 user.getOut().writeObject(new ErrorMessage("Could not find user"));
                             }
@@ -188,18 +200,29 @@ public class ChatServerSocketListener implements Runnable {
                 System.out.println("Caught socket ex for " + 
                     user.getHostName());
             } else {
-                System.out.println(ex);
                 ex.printStackTrace();
             }
         } finally {
             users.remove(user);
+            System.out.printf("User %s disconnected\n", user);
 
             synchronized (rooms) {
                 for (Room room: rooms.values()) {
                     if (room.hasUser(user)) {
                         try {
                             room.disconnectUser(user);
-                        } catch (IOException ex) {}
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (room instanceof PrivateRoom) {
+                        try {
+                            if (((PrivateRoom) room).removeUser(user)) {
+                                System.out.printf("User %s removed from %s\n", user, room);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
