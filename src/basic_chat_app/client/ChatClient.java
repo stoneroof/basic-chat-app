@@ -1,5 +1,6 @@
 package basic_chat_app.client;
 
+import basic_chat_app.server.Room;
 import basic_chat_app.shared.*;
 
 import java.io.ObjectInputStream;
@@ -59,6 +60,7 @@ public class ChatClient {
                     BOLD + "/join <room>"   , "\tjoins a room by its name", "\tcreates a public room if the room doesn't exist",
                     BOLD + "/rename <room>" , "\trenames the current room",
                     BOLD + "/leave"         , "\tleaves the current room",
+                    BOLD + "/leave <room>"  , "\tleaves the specified room",
                     "",
                     INVERSE + "[Private Rooms]",
                     BOLD + "/private <room>", "\tcreates a private room",
@@ -91,8 +93,14 @@ public class ChatClient {
                         System.out.println("Please join a room");
                     }
                     else if (lower.startsWith("/leave")) {
-                        sendRequest(new RoomLeaveRequest(shared));
-                        shared.connected = false;
+                        if (lower.strip().equals("/leave")){
+                            sendRequest(new RoomLeaveRequest(shared));
+                            shared.connected = false;
+                        }
+                        else{
+                            sendRequest(new RoomLeaveRequest(lower.substring(7).strip()));
+                        }
+
                     }
                     else if (lower.startsWith("/add")) {
                         sendRequest(new AddUserRequest(shared, line.substring(4).strip()));
