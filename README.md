@@ -9,6 +9,8 @@ A Java-based chat application that features:
 
 ## Getting Started
 
+The basic chat app requires Java 14 or later.
+
 ### Quick Start
 
 [Download the server JAR](https://github.com/edwfeng/basic-chat-app/suites/4124396306/artifacts/105506688), then connect to it with [the client JAR](https://github.com/edwfeng/basic-chat-app/suites/4124396306/artifacts/105506687).
