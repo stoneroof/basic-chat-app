@@ -41,3 +41,11 @@ To generate JAR files, use:
 ./gradlew serverJar
 ./gradlew clientJar
 ```
+
+## Authors
+
+@alevol22 - Sasha Volkova\
+@anli5005 - Anthony Li\
+@edwfeng - Edward Feng
+
+Initial chat app code by @atcs-wang
